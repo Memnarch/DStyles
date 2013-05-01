@@ -79,7 +79,7 @@ begin
     LPosRect := MSG.CalcSize_Params^.rgrc0;
     LNewClientRect.Left := LPosRect.Left + StyleSystem.Metrics.FrameSize;
     LNewClientRect.Right := LPosRect.Right - StyleSystem.Metrics.FrameSize;
-    LNewClientRect.Top := LPosRect.Top + StyleSystem.Metrics.FHeaderHeight;
+    LNewClientRect.Top := LPosRect.Top + StyleSystem.Metrics.HeaderHeight;
     LNewClientRect.Bottom := LPosRect.Bottom - StyleSystem.Metrics.FrameSize;
     MSG.CalcSize_Params^.rgrc0 := LNewClientRect;
     UpdateRects(LPosRect);
@@ -341,7 +341,7 @@ begin
   FTopBorderRect.Left := 0;
   FTopBorderRect.Top := 0;
   FTopBorderRect.Right := LWidth; //Width+1;
-  FTopBorderRect.Bottom := StyleSystem.Metrics.FHeaderHeight; //Height - ClientHeight - GetSystemMetrics(SM_CYSIZEFRAME);
+  FTopBorderRect.Bottom := StyleSystem.Metrics.HeaderHeight; //Height - ClientHeight - GetSystemMetrics(SM_CYSIZEFRAME);
 
   FLeftBorderRect.Left := 0;
   FLeftBorderRect.Top := FTopBorderRect.Bottom;
@@ -359,19 +359,19 @@ begin
   FBottomBorderRect.Bottom := LHeight;
 
   FMinimizeRect.Left := 20;
-  FMinimizeRect.Right := FMinimizeRect.Left + 24;
+  FMinimizeRect.Right := FMinimizeRect.Left + StyleSystem.Metrics.FormButtonWidth;
   FMinimizeRect.Top := 2;
-  FMinimizeRect.Bottom := FMinimizeRect.Top + 24;
+  FMinimizeRect.Bottom := FMinimizeRect.Top + StyleSystem.Metrics.FormButtonHeight;
 
   FMaximizeRect.Left := FMinimizeRect.Right + 5;
-  FMaximizeRect.Right := FMaximizeRect.Left + 24;
+  FMaximizeRect.Right := FMaximizeRect.Left + StyleSystem.Metrics.FormButtonWidth;
   FMaximizeRect.Top := 2;
-  FMaximizeRect.Bottom := FMaximizeRect.Top + 24;
+  FMaximizeRect.Bottom := FMaximizeRect.Top + StyleSystem.Metrics.FormButtonHeight;
 
   FCloseRect.Left := FMaximizeRect.Right + 5;
-  FCloseRect.Right := FCloseRect.Left + 24;
+  FCloseRect.Right := FCloseRect.Left + StyleSystem.Metrics.FormButtonWidth;
   FCloseRect.Top := 2;
-  FCloseRect.Bottom := FCloseRect.Top + 24;
+  FCloseRect.Bottom := FCloseRect.Top + StyleSystem.Metrics.FormButtonHeight;
 end;
 
 end.
