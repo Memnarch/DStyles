@@ -73,13 +73,18 @@ procedure TForm.NCCalcSize(var MSG: TWMNCCalcSize);
 var
   LPosRect, LNewClientRect: TRect;
 begin
-  LPosRect := MSG.CalcSize_Params.rgrc0;
-  inherited;
+
   if MSG.CalcValidRects then
   begin
-    LNewClientRect := MSG.CalcSize_Params.rgrc0;
+    LPosRect := MSG.CalcSize_Params^.rgrc0;
+    LNewClientRect.Left := LPosRect.Left + StyleSystem.Metrics.FrameSize;
+    LNewClientRect.Right := LPosRect.Right - StyleSystem.Metrics.FrameSize;
+    LNewClientRect.Top := LPosRect.Top + StyleSystem.Metrics.FHeaderHeight;
+    LNewClientRect.Bottom := LPosRect.Bottom - StyleSystem.Metrics.FrameSize;
+    MSG.CalcSize_Params^.rgrc0 := LNewClientRect;
     UpdateRects(LPosRect);
   end;
+  MSG.Result := 0;
 end;
 
 procedure TForm.NCHitTest(var MSG: TWMNCHitTest);
@@ -254,27 +259,33 @@ var
 begin
   LELement := StyleSystem.GetElement('Form_Border_Top');
   //left corner
-  StyleSystem.PaintTileElement(ADC, Rect(FTopBorderRect.Left, FTopBorderRect.Top, FTopBorderRect.Left +8, FTopBorderRect.Bottom),
-    Rect(0,0, 8, FTopBorderRect.Bottom), LELement);
+  StyleSystem.PaintTileElement(ADC,
+    Rect(FTopBorderRect.Left, FTopBorderRect.Top, FTopBorderRect.Left + StyleSystem.Metrics.FrameSize, FTopBorderRect.Bottom),
+    Rect(0,0, StyleSystem.Metrics.FrameSize, FTopBorderRect.Bottom), LELement);
   //center piece
-  StyleSystem.PaintTileElement(ADC, Rect(FTopBorderRect.Left+8, FTopBorderRect.Top, FTopBorderRect.Right-8, FTopBorderRect.Bottom),
-    Rect(8,0, LELement.Width-16, FTopBorderRect.Bottom), LELement);
+  StyleSystem.PaintTileElement(ADC,
+    Rect(FTopBorderRect.Left+StyleSystem.Metrics.FrameSize, FTopBorderRect.Top, FTopBorderRect.Right-StyleSystem.Metrics.FrameSize, FTopBorderRect.Bottom),
+    Rect(StyleSystem.Metrics.FrameSize,0, LELement.Width-StyleSystem.Metrics.FrameSize*2, FTopBorderRect.Bottom), LELement);
   //right corner
-  StyleSystem.PaintTileElement(ADC, Rect(FTopBorderRect.Right-8, FTopBorderRect.Top, FTopBorderRect.Right, FTopBorderRect.Bottom),
-    Rect(LELement.Width-8,0, 8, FTopBorderRect.Bottom), LELement);
+  StyleSystem.PaintTileElement(ADC,
+    Rect(FTopBorderRect.Right-StyleSystem.Metrics.FrameSize, FTopBorderRect.Top, FTopBorderRect.Right, FTopBorderRect.Bottom),
+    Rect(LELement.Width-StyleSystem.Metrics.FrameSize,0, StyleSystem.Metrics.FrameSize, FTopBorderRect.Bottom), LELement);
 
   StyleSystem.PaintElement(ADC, FLeftBorderRect, 'Form_Border_Left');
   StyleSystem.PaintElement(ADC, FRightBorderRect, 'Form_Border_Right');
   LELement := StyleSystem.GetElement('Form_Border_Bottom');
   //left corner
-  StyleSystem.PaintTileElement(ADC, Rect(FBottomBorderRect.Left, FBottomBorderRect.Top, FBottomBorderRect.Left+8, FBottomBorderRect.Bottom),
-  Rect(0, 0, 8, 8), LELement);
+  StyleSystem.PaintTileElement(ADC,
+  Rect(FBottomBorderRect.Left, FBottomBorderRect.Top, FBottomBorderRect.Left+StyleSystem.Metrics.FrameSize, FBottomBorderRect.Bottom),
+  Rect(0, 0, StyleSystem.Metrics.FrameSize, StyleSystem.Metrics.FrameSize), LELement);
   //center part
-  StyleSystem.PaintTileElement(ADC, Rect(FBottomBorderRect.Left+8, FBottomBorderRect.Top, FBottomBorderRect.Right-8, FBottomBorderRect.Bottom),
-  Rect(8, 0, LELement.Width-16, 8), LELement);
+  StyleSystem.PaintTileElement(ADC,
+  Rect(FBottomBorderRect.Left+StyleSystem.Metrics.FrameSize, FBottomBorderRect.Top, FBottomBorderRect.Right-StyleSystem.Metrics.FrameSize, FBottomBorderRect.Bottom),
+  Rect(StyleSystem.Metrics.FrameSize, 0, LELement.Width-StyleSystem.Metrics.FrameSize*2, StyleSystem.Metrics.FrameSize), LELement);
   //Right corner corner
-  StyleSystem.PaintTileElement(ADC, Rect(FBottomBorderRect.Right-8, FBottomBorderRect.Top, FBottomBorderRect.Right, FBottomBorderRect.Bottom),
-  Rect(LELement.Width-8, 0, 8, 8), LELement);
+  StyleSystem.PaintTileElement(ADC,
+  Rect(FBottomBorderRect.Right-StyleSystem.Metrics.FrameSize, FBottomBorderRect.Top, FBottomBorderRect.Right, FBottomBorderRect.Bottom),
+  Rect(LELement.Width-StyleSystem.Metrics.FrameSize, 0, StyleSystem.Metrics.FrameSize, StyleSystem.Metrics.FrameSize), LELement);
 end;
 
 procedure TForm.RepaintButtons(ADC: HDC);
@@ -330,21 +341,21 @@ begin
   FTopBorderRect.Left := 0;
   FTopBorderRect.Top := 0;
   FTopBorderRect.Right := LWidth; //Width+1;
-  FTopBorderRect.Bottom := GetSystemMetrics(SM_CYSIZEFRAME) + 22; //Height - ClientHeight - GetSystemMetrics(SM_CYSIZEFRAME);
+  FTopBorderRect.Bottom := StyleSystem.Metrics.FHeaderHeight; //Height - ClientHeight - GetSystemMetrics(SM_CYSIZEFRAME);
 
   FLeftBorderRect.Left := 0;
   FLeftBorderRect.Top := FTopBorderRect.Bottom;
-  FLeftBorderRect.Right := GetSystemMetrics(SM_CYSIZEFRAME);
-  FLeftBorderRect.Bottom := LHeight - GetSystemMetrics(SM_CYSIZEFRAME);
+  FLeftBorderRect.Right := StyleSystem.Metrics.FrameSize;
+  FLeftBorderRect.Bottom := LHeight - StyleSystem.Metrics.FrameSize;
 
   FRightBorderRect.Top := FLeftBorderRect.Top;
-  FRightBorderRect.Left := LWidth - GetSystemMetrics(SM_CYSIZEFRAME);
+  FRightBorderRect.Left := LWidth - StyleSystem.Metrics.FrameSize;
   FRightBorderRect.Right := LWidth;// + 1;
-  FRightBorderRect.Bottom := LHeight - GetSystemMetrics(SM_CYSIZEFRAME);
+  FRightBorderRect.Bottom := LHeight - StyleSystem.Metrics.FrameSize;
 
   FBottomBorderRect.Left := 0;
   FBottomBorderRect.Right := LWidth;// + 1;
-  FBottomBorderRect.Top := LHeight - GetSystemMetrics(SM_CYSIZEFRAME);
+  FBottomBorderRect.Top := LHeight - StyleSystem.Metrics.FrameSize;
   FBottomBorderRect.Bottom := LHeight;
 
   FMinimizeRect.Left := 20;
