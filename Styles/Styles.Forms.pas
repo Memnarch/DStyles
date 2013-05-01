@@ -3,7 +3,7 @@ unit Styles.Forms;
 interface
 
 uses
-  Classes, Types, Windows, Messages, Forms;
+  Classes, Types, Windows, Messages, Forms, Graphics;
 
 type
   TButtonState = (bsNormal, bsHover, bsPressed);
@@ -40,7 +40,7 @@ type
 implementation
 
 uses
-  UxTheme, Styles, Math;
+  uxTheme, Styles, Math;
 
 { TForm }
 
@@ -59,7 +59,6 @@ var
 begin
   if MSG.Unused <> -1 then
   begin
-    Canvas.FillRect(Canvas.ClipRect);
     LDC := GetWindowDC(Handle); //GetDCEx(Handle, 0, DCX_WINDOW or DCX_INTERSECTRGN or DCX_USERSTYLE);
     if LDC <> 0 then
     begin
@@ -240,7 +239,6 @@ procedure TForm.PaintNC(var MSG: TWMNCPaint);
 var
   LDC: HDC;
 begin
-  Canvas.FillRect(Canvas.ClipRect);
   LDC := GetWindowDC(Handle);
   if LDC <> 0 then
   begin
@@ -251,11 +249,32 @@ begin
 end;
 
 procedure TForm.RepaintBorder(ADC: HDC);
+var
+  LELement: TBitmap;
 begin
-  StyleSystem.PaintElement(ADC, FTopBorderRect, 'Form_Border_Top');
+  LELement := StyleSystem.GetElement('Form_Border_Top');
+  //left corner
+  StyleSystem.PaintTileElement(ADC, Rect(FTopBorderRect.Left, FTopBorderRect.Top, FTopBorderRect.Left +8, FTopBorderRect.Bottom),
+    Rect(0,0, 8, FTopBorderRect.Bottom), LELement);
+  //center piece
+  StyleSystem.PaintTileElement(ADC, Rect(FTopBorderRect.Left+8, FTopBorderRect.Top, FTopBorderRect.Right-8, FTopBorderRect.Bottom),
+    Rect(8,0, LELement.Width-16, FTopBorderRect.Bottom), LELement);
+  //right corner
+  StyleSystem.PaintTileElement(ADC, Rect(FTopBorderRect.Right-8, FTopBorderRect.Top, FTopBorderRect.Right, FTopBorderRect.Bottom),
+    Rect(LELement.Width-8,0, 8, FTopBorderRect.Bottom), LELement);
+
   StyleSystem.PaintElement(ADC, FLeftBorderRect, 'Form_Border_Left');
   StyleSystem.PaintElement(ADC, FRightBorderRect, 'Form_Border_Right');
-  StyleSystem.PaintElement(ADC, FBottomBorderRect, 'Form_Border_Bottom');
+  LELement := StyleSystem.GetElement('Form_Border_Bottom');
+  //left corner
+  StyleSystem.PaintTileElement(ADC, Rect(FBottomBorderRect.Left, FBottomBorderRect.Top, FBottomBorderRect.Left+8, FBottomBorderRect.Bottom),
+  Rect(0, 0, 8, 8), LELement);
+  //center part
+  StyleSystem.PaintTileElement(ADC, Rect(FBottomBorderRect.Left+8, FBottomBorderRect.Top, FBottomBorderRect.Right-8, FBottomBorderRect.Bottom),
+  Rect(8, 0, LELement.Width-16, 8), LELement);
+  //Right corner corner
+  StyleSystem.PaintTileElement(ADC, Rect(FBottomBorderRect.Right-8, FBottomBorderRect.Top, FBottomBorderRect.Right, FBottomBorderRect.Bottom),
+  Rect(LELement.Width-8, 0, 8, 8), LELement);
 end;
 
 procedure TForm.RepaintButtons(ADC: HDC);
