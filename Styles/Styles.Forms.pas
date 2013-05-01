@@ -33,6 +33,7 @@ type
     procedure RepaintButtons(ADC: HDC);
     procedure UpdateRects(ANew: TRect);
     procedure UpdateButtons();
+    procedure UpdateAll();
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -59,13 +60,7 @@ var
 begin
   if MSG.Unused <> -1 then
   begin
-    LDC := GetWindowDC(Handle); //GetDCEx(Handle, 0, DCX_WINDOW or DCX_INTERSECTRGN or DCX_USERSTYLE);
-    if LDC <> 0 then
-    begin
-      RepaintBorder(LDC);
-      RepaintButtons(LDC);
-      ReleaseDC(Handle, LDC);
-    end;
+    UpdateAll();
   end;
 end;
 
@@ -240,16 +235,8 @@ begin
 end;
 
 procedure TForm.PaintNC(var MSG: TWMNCPaint);
-var
-  LDC: HDC;
 begin
-  LDC := GetWindowDC(Handle);
-  if LDC <> 0 then
-  begin
-    RepaintBorder(LDC);
-    RepaintButtons(LDC);
-    ReleaseDC(Handle, LDC);
-  end;
+  UpdateAll();
 end;
 
 procedure TForm.RepaintBorder(ADC: HDC);
@@ -324,6 +311,19 @@ begin
     bsNormal: StyleSystem.PaintElement(ADC, FCloseRect, 'Button_Close');
     bsHover: StyleSystem.PaintElement(ADC, FCloseRect, 'Button_Close_Hover');
     bsPressed: StyleSystem.PaintElement(ADC, FCloseRect, 'Button_Close_Pressed');
+  end;
+end;
+
+procedure TForm.UpdateAll;
+var
+  LDC: HDC;
+begin
+  LDC := GetWindowDC(Handle);
+  if LDC <> 0 then
+  begin
+    RepaintBorder(LDC);
+    RepaintButtons(LDC);
+    ReleaseDC(Handle, LDC);
   end;
 end;
 
