@@ -20,7 +20,11 @@ var
 implementation
 
 initialization
-  StyleSystem.LoadElements('E:\Git\DStyles\StyleElements\Test');
+  StyleSystem.Metrics.FrameSize := 7;
+  StyleSystem.Metrics.HeaderHeight := 28;
+  StyleSystem.Metrics.FormButtonWidth := 18;
+  StyleSystem.Metrics.FormButtonHeight := 18;
+  StyleSystem.LoadElements('E:\Git\DStyles\StyleElements\OrangeGraphit');
 
 {$R *.dfm}
 
