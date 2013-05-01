@@ -6,16 +6,23 @@ uses
   Classes, Types, Windows, Messages, Forms;
 
 type
+  TButtonState = (bsNormal, bsHover, bsPressed);
+
   TForm = class(Forms.TForm)
   private
     FMinimizeRect: TRect;
     FMaximizeRect: TRect;
     FCloseRect: TRect;
+    FMinState: TButtonState;
+    FMaxState: TButtonState;
+    FCloseState: TButtonState;
     FTopBorderRect: TRect;
     FLeftBorderRect: TRect;
     FRightBorderRect: TRect;
     FBottomBorderRect: TRect;
     FLastHit: Integer;
+    procedure NCMouseMove(var MSG: TWMNCMouseMove); message WM_NCMOUSEMOVE;
+    procedure HandleMouseLeave();
     procedure NCHitTest(var MSG: TWMNCHitTest); message WM_NCHITTEST;
     procedure NCCalcSize(var MSG: TWMNCCalcSize); message WM_NCCALCSIZE;
     procedure NCLButtonDown(var MSG: TWMNCLButtonDown); message WM_NCLBUTTONDOWN;
@@ -25,6 +32,7 @@ type
     procedure RepaintBorder(ADC: HDC);
     procedure RepaintButtons(ADC: HDC);
     procedure UpdateRects(ANew: TRect);
+    procedure UpdateButtons();
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -39,6 +47,8 @@ uses
 constructor TForm.Create(AOwner: TComponent);
 begin
   inherited;
+  BorderIcons := BorderIcons - [biSystemMenu];
+  FLastHit := -1;
   Application.ProcessMessages();
   SetWindowTheme(Handle, '', '');
 end;
@@ -75,14 +85,26 @@ end;
 
 procedure TForm.NCHitTest(var MSG: TWMNCHitTest);
 var
-  LDC: HDC;
   LPoint: TPoint;
+  LUpdatedButtons: Boolean;
 begin
+  LUpdatedButtons := (not ((FMinState = FMaxState) and (FMinState = FCloseState))) and (FLastHit = -1);
+  if LUpdatedButtons then
+  begin
+    FMinState := bsNormal;
+    FMaxState := bsNormal;
+    FCloseState := bsNormal;
+  end;
+
   inherited;
   case MSG.Result of
     HTMINBUTTON, HTMAXBUTTON, HTCLOSE:
     begin
       MSG.Result := HTCAPTION;
+      if LUpdatedButtons then
+      begin
+        UpdateButtons();
+      end;
       Exit;
     end;
   end;
@@ -94,17 +116,36 @@ begin
     if PtInRect(FMinimizeRect, LPoint) then
     begin
       MSG.Result := HTMINBUTTON;
+      if FLastHit = -1 then
+      begin
+        FMinState := bsHover;
+        UpdateButtons();
+      end;
       Exit;
     end
     else if PtInRect(FMaximizeRect, LPoint) then
     begin
       MSG.Result := HTMAXBUTTON;
+      if FLastHit = -1 then
+      begin
+        FMaxState := bsHover;
+        UpdateButtons();
+      end;
       Exit;
     end
     else if PtInRect(FCloseRect, LPoint) then
     begin
       MSG.Result := HTCLOSE;
+      if FLastHit = -1 then
+      begin
+        FCloseState := bsHover;
+        UpdateButtons();
+      end;
       Exit;
+    end
+    else if LUpdatedButtons then
+    begin
+      UpdateButtons();
     end;
   end;
 end;
@@ -115,9 +156,27 @@ begin
     HTMINBUTTON, HTMAXBUTTON, HTCLOSE:
     begin
       FLastHit := MSG.HitTest;
+      case MSG.HitTest of
+        HTMINBUTTON:
+        begin
+          FMinState := bsPressed;
+        end;
+
+        HTMAXBUTTON:
+        begin
+          FMaxState := bsPressed;
+        end;
+
+        HTCLOSE:
+        begin
+          FCloseState := bsPressed;
+        end;
+      end;
+      UpdateButtons();
     end;
     else
     begin
+      FLastHit := -1;
       inherited;
     end;
   end;
@@ -157,6 +216,24 @@ begin
       inherited;
     end;
   end;
+  FLastHit := -1;
+end;
+
+procedure TForm.HandleMouseLeave;
+begin
+  FMinState := bsNormal;
+  FMaxState := bsNormal;
+  FCloseState := bsNormal;
+  FLastHit := -1;
+  UpdateButtons();
+end;
+
+procedure TForm.NCMouseMove(var MSG: TWMNCMouseMove);
+begin
+  if (FLastHit <> -1) and (MSG.HitTest <> FLastHit) then
+  begin
+    HandleMouseLeave();
+  end;
 end;
 
 procedure TForm.PaintNC(var MSG: TWMNCPaint);
@@ -183,16 +260,46 @@ end;
 
 procedure TForm.RepaintButtons(ADC: HDC);
 begin
-  StyleSystem.PaintElement(ADC, FMinimizeRect, 'Button_Minimize');
+  case FMinState of
+    bsNormal: StyleSystem.PaintElement(ADC, FMinimizeRect, 'Button_Minimize');
+    bsHover: StyleSystem.PaintElement(ADC, FMinimizeRect, 'Button_Minimize_Hover');
+    bsPressed: StyleSystem.PaintElement(ADC, FMinimizeRect, 'Button_Minimize_Pressed');
+  end;
+
   if WindowState = wsMaximized then
   begin
-    StyleSystem.PaintElement(ADC, FMaximizeRect, 'Button_Restore');
+    case FMaxState of
+      bsNormal: StyleSystem.PaintElement(ADC, FMaximizeRect, 'Button_Restore');
+      bsHover: StyleSystem.PaintElement(ADC, FMaximizeRect, 'Button_Restore_Hover');
+      bsPressed: StyleSystem.PaintElement(ADC, FMaximizeRect, 'Button_Restore_Pressed');
+    end;
   end
   else
   begin
-    StyleSystem.PaintElement(ADC, FMaximizeRect, 'Button_Maximize');
+    case FMaxState of
+      bsNormal: StyleSystem.PaintElement(ADC, FMaximizeRect, 'Button_Maximize');
+      bsHover: StyleSystem.PaintElement(ADC, FMaximizeRect, 'Button_Maximize_Hover');
+      bsPressed: StyleSystem.PaintElement(ADC, FMaximizeRect, 'Button_Maximize_Pressed');
+    end;
   end;
-  StyleSystem.PaintElement(ADC, FCloseRect, 'Button_Close');
+
+  case FCloseState of
+    bsNormal: StyleSystem.PaintElement(ADC, FCloseRect, 'Button_Close');
+    bsHover: StyleSystem.PaintElement(ADC, FCloseRect, 'Button_Close_Hover');
+    bsPressed: StyleSystem.PaintElement(ADC, FCloseRect, 'Button_Close_Pressed');
+  end;
+end;
+
+procedure TForm.UpdateButtons;
+var
+  LDC: HDC;
+begin
+  LDC := GetWindowDC(Handle);
+  if LDC <> 0 then
+  begin
+    RepaintButtons(LDC);
+    ReleaseDC(Handle, LDC);
+  end;
 end;
 
 procedure TForm.UpdateRects;
