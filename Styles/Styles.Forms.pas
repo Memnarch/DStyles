@@ -255,6 +255,7 @@ end;
 procedure TForm.RepaintBorder(ADC: HDC);
 var
   LELement: TBitmap;
+  LTextRect: TRect;
 begin
   LELement := StyleSystem.GetElement('Form_Border_Top');
   //left corner
@@ -285,6 +286,13 @@ begin
   StyleSystem.PaintTileElement(ADC,
   Rect(FBottomBorderRect.Right-StyleSystem.Metrics.FrameSize, FBottomBorderRect.Top, FBottomBorderRect.Right, FBottomBorderRect.Bottom),
   Rect(LELement.Width-StyleSystem.Metrics.FrameSize, 0, StyleSystem.Metrics.FrameSize, StyleSystem.Metrics.FrameSize), LELement);
+  //and draw caption and icon
+  LTextRect := Rect(32, 5, 100, 100);
+  SetBkMode(ADC, TRANSPARENT);
+  SetTextColor(ADC, clWhite);
+  ExtTextOut(ADC, StyleSystem.Metrics.FrameSize + 25, StyleSystem.Metrics.FrameSize, 0, nil, Caption, Length(Caption), nil);
+//  DrawIcon(ADC, 5, 5, Application.Icon.Handle);
+  DrawIconEx(ADC, StyleSystem.Metrics.FrameSize, StyleSystem.Metrics.FrameSize, Application.Icon.Handle, 16, 16, 0, 0, DI_NORMAL);
 end;
 
 procedure TForm.RepaintButtons(ADC: HDC);
