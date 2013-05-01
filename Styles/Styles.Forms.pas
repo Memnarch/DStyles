@@ -109,7 +109,6 @@ begin
       begin
         UpdateButtons();
       end;
-      Exit;
     end;
   end;
   LPoint := Point(MSG.XPos, MSG.YPos);
@@ -358,20 +357,20 @@ begin
   FBottomBorderRect.Top := LHeight - StyleSystem.Metrics.FrameSize;
   FBottomBorderRect.Bottom := LHeight;
 
-  FMinimizeRect.Left := 20;
-  FMinimizeRect.Right := FMinimizeRect.Left + StyleSystem.Metrics.FormButtonWidth;
-  FMinimizeRect.Top := 2;
-  FMinimizeRect.Bottom := FMinimizeRect.Top + StyleSystem.Metrics.FormButtonHeight;
+  FCloseRect.Left := FTopBorderRect.Right- StyleSystem.Metrics.FrameSize - StyleSystem.Metrics.FormButtonWidth;// FMaximizeRect.Right + 5;
+  FCloseRect.Right := FCloseRect.Left + StyleSystem.Metrics.FormButtonWidth;
+  FCloseRect.Top := (FTopBorderRect.Bottom - StyleSystem.Metrics.FormButtonHeight) div 2;
+  FCloseRect.Bottom := FCloseRect.Top + StyleSystem.Metrics.FormButtonHeight;
 
-  FMaximizeRect.Left := FMinimizeRect.Right + 5;
+  FMaximizeRect.Left := FCloseRect.Left - 5 - StyleSystem.Metrics.FormButtonWidth;
   FMaximizeRect.Right := FMaximizeRect.Left + StyleSystem.Metrics.FormButtonWidth;
-  FMaximizeRect.Top := 2;
+  FMaximizeRect.Top := FCloseRect.Top;
   FMaximizeRect.Bottom := FMaximizeRect.Top + StyleSystem.Metrics.FormButtonHeight;
 
-  FCloseRect.Left := FMaximizeRect.Right + 5;
-  FCloseRect.Right := FCloseRect.Left + StyleSystem.Metrics.FormButtonWidth;
-  FCloseRect.Top := 2;
-  FCloseRect.Bottom := FCloseRect.Top + StyleSystem.Metrics.FormButtonHeight;
+  FMinimizeRect.Left := FMaximizeRect.Left - 5 - StyleSystem.Metrics.FormButtonWidth;
+  FMinimizeRect.Right := FMinimizeRect.Left + StyleSystem.Metrics.FormButtonWidth;
+  FMinimizeRect.Top := FCloseRect.Top;
+  FMinimizeRect.Bottom := FMinimizeRect.Top + StyleSystem.Metrics.FormButtonHeight;
 end;
 
 end.
