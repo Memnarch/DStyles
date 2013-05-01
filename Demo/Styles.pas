@@ -6,9 +6,17 @@ uses
   Classes, Types, Windows, SysUtils, Generics.Collections, Graphics, PNGImage;
 
 type
-  TMetrics = record
-    FrameSize: Integer;
+  TMetrics = class
+  private
     FHeaderHeight: Integer;
+    FFrameSize: Integer;
+    FFormButtonHeight: Integer;
+    FFormButtonWidth: Integer;
+  public
+    property FrameSize: Integer read FFrameSize write FFrameSize;
+    property HeaderHeight: Integer read FHeaderHeight write FHeaderHeight;
+    property FormButtonWidth: Integer read FFormButtonWidth write FFormButtonWidth;
+    property FormButtonHeight: Integer read FFormButtonHeight write FFormButtonHeight;
   end;
 
   TStyleSystem = class
@@ -45,6 +53,7 @@ constructor TStyleSystem.Create;
 begin
   FElements := TDictionary<string, TBitmap>.Create();
   FDummy := TBitmap.Create();// TPngImage.CreateBlank(COLOR_RGBALPHA, 8, 128, 128);
+  FMetrics := TMetrics.Create();
   SetupDummy();
   InitMetrics();
 end;
@@ -52,6 +61,7 @@ end;
 destructor TStyleSystem.Destroy;
 begin
   FElements.Free;
+  FMetrics.Free;
   inherited;
 end;
 
@@ -70,6 +80,8 @@ procedure TStyleSystem.InitMetrics;
 begin
   FMetrics.FrameSize := 16;// GetSystemMetrics(SM_CYSIZEFRAME);
   FMetrics.FHeaderHeight := 22 + FMetrics.FrameSize;
+  FMetrics.FormButtonWidth := 24;
+  FMetrics.FormButtonHeight := 24;
 end;
 
 procedure TStyleSystem.LoadElements(AFolder: string);
