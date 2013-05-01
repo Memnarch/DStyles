@@ -20,7 +20,7 @@ var
 implementation
 
 initialization
-  StyleSystem.LoadElements('E:\Git\FormStyles\StyleElements\Test');
+  StyleSystem.LoadElements('E:\Git\DStyles\StyleElements\Test');
 
 {$R *.dfm}
 
