@@ -6,11 +6,18 @@ uses
   Classes, Types, Windows, SysUtils, Generics.Collections, Graphics, PNGImage;
 
 type
+  TMetrics = record
+    FrameSize: Integer;
+    FHeaderHeight: Integer;
+  end;
+
   TStyleSystem = class
   private
     FElements: TDictionary<string, TBitmap>;
     FDummy: TBitmap;
+    FMetrics: TMetrics;
     procedure SetupDummy();
+    procedure InitMetrics();
   public
     constructor Create();
     destructor Destroy(); override;
@@ -18,6 +25,7 @@ type
     function GetElement(AName: string): TBitmap;
     procedure PaintElement(ADC: HDC; ARect: TRect; AElementName: string; AAlpha: Byte = 255);
     procedure PaintTileElement(ADC: HDC; ARect, ATile: TRect; AElement: TBitmap; AAlpha: Byte = 255);
+    property Metrics: TMetrics read FMetrics write FMetrics;
   end;
 
 var
@@ -29,7 +37,7 @@ const
 implementation
 
 uses
-  IOUtils;
+  IOUtils, Math;
 
 { TStyleSystem }
 
@@ -38,6 +46,7 @@ begin
   FElements := TDictionary<string, TBitmap>.Create();
   FDummy := TBitmap.Create();// TPngImage.CreateBlank(COLOR_RGBALPHA, 8, 128, 128);
   SetupDummy();
+  InitMetrics();
 end;
 
 destructor TStyleSystem.Destroy;
@@ -55,6 +64,12 @@ begin
   begin
     Result := LResult;
   end;
+end;
+
+procedure TStyleSystem.InitMetrics;
+begin
+  FMetrics.FrameSize := 16;// GetSystemMetrics(SM_CYSIZEFRAME);
+  FMetrics.FHeaderHeight := 22 + FMetrics.FrameSize;
 end;
 
 procedure TStyleSystem.LoadElements(AFolder: string);
@@ -99,7 +114,7 @@ begin
   LFunc.AlphaFormat := AC_SRC_ALPHA;
   LFunc.SourceConstantAlpha := AAlpha;
   StretchBlt(ADC, ARect.Left, ARect.Top, ARect.Right-ARect.Left, ARect.Bottom-ARect.Top,
-    AELement.Canvas.Handle, ATile.Left, ATile.Top, ATile.Right, ATile.Bottom, SRCCOPY);
+    AELement.Canvas.Handle, ATile.Left, ATile.Top, Min(ATile.Right, AElement.Width), Min(ATile.Bottom, AElement.Height), SRCCOPY);
 //  AlphaBlend(ADC, ARect.Left, ARect.Top, ARect.Right-ARect.Left, ARect.Bottom-ARect.Top,
 //    LELement.Canvas.Handle, 0, 0, LELement.Width, LELement.Height, LFunc);
 end;
