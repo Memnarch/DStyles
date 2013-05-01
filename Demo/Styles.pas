@@ -17,6 +17,7 @@ type
     procedure LoadElements(AFolder: string);
     function GetElement(AName: string): TBitmap;
     procedure PaintElement(ADC: HDC; ARect: TRect; AElementName: string; AAlpha: Byte = 255);
+    procedure PaintTileElement(ADC: HDC; ARect, ATile: TRect; AElement: TBitmap; AAlpha: Byte = 255);
   end;
 
 var
@@ -83,15 +84,22 @@ procedure TStyleSystem.PaintElement(ADC: HDC; ARect: TRect;
   AElementName: string; AAlpha: Byte = 255);
 var
   LElement: TBitmap;
-  LFunc: _BLENDFUNCTION;
 begin
   LElement := GetElement(AElementName);
+  PaintTileElement(ADC, ARect, Rect(0, 0, Lelement.Width, LElement.Height), LElement);
+end;
+
+procedure TStyleSystem.PaintTileElement(ADC: HDC; ARect, ATile: TRect;
+  AElement: TBitmap; AAlpha: Byte);
+var
+  LFunc: _BLENDFUNCTION;
+begin
   LFunc.BlendOp := AC_SRC_OVER;
   LFunc.BlendFlags := 0;
   LFunc.AlphaFormat := AC_SRC_ALPHA;
   LFunc.SourceConstantAlpha := AAlpha;
   StretchBlt(ADC, ARect.Left, ARect.Top, ARect.Right-ARect.Left, ARect.Bottom-ARect.Top,
-    LELement.Canvas.Handle, 0, 0, LELement.Width, LELement.Height, SRCCOPY);
+    AELement.Canvas.Handle, ATile.Left, ATile.Top, ATile.Right, ATile.Bottom, SRCCOPY);
 //  AlphaBlend(ADC, ARect.Left, ARect.Top, ARect.Right-ARect.Left, ARect.Bottom-ARect.Top,
 //    LELement.Canvas.Handle, 0, 0, LELement.Width, LELement.Height, LFunc);
 end;
