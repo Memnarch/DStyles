@@ -14,4 +14,20 @@ object Form1: TForm1
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
+  object Button1: TButton
+    Left = 72
+    Top = 200
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 0
+  end
+  object ProgressBar1: TProgressBar
+    Left = 208
+    Top = 160
+    Width = 150
+    Height = 17
+    Position = 50
+    TabOrder = 1
+  end
 end
