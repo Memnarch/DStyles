@@ -3,7 +3,7 @@ unit Styles.Forms;
 interface
 
 uses
-  Classes, Types, Windows, Messages, Forms, Graphics;
+  Classes, Types, Windows, Messages, Forms, Graphics, Direct2D;
 
 type
   TButtonState = (bsNormal, bsHover, bsPressed);
@@ -21,6 +21,7 @@ type
     FRightBorderRect: TRect;
     FBottomBorderRect: TRect;
     FLastHit: Integer;
+    FCanvas2D: TDirect2DCanvas;
     procedure NCMouseMove(var MSG: TWMNCMouseMove); message WM_NCMOUSEMOVE;
     procedure HandleMouseLeave();
     procedure NCHitTest(var MSG: TWMNCHitTest); message WM_NCHITTEST;
@@ -29,6 +30,7 @@ type
     procedure NCLButtonUp(var MSG: TWMNCLButtonUp); message WM_NCLBUTTONUP;
     procedure NCActivate(var MSG: TWMNCActivate); message WM_NCACTIVATE;
     procedure PaintNC(var MSG: TWMNCPaint); message WM_NCPAINT;
+    procedure WMPaint(var MSG: TWMPaint); message WM_PAINT;
     procedure RepaintBorder(ADC: HDC);
     procedure RepaintButtons(ADC: HDC);
     procedure UpdateRects(ANew: TRect);
@@ -52,6 +54,7 @@ begin
   FLastHit := -1;
   Application.ProcessMessages();
   SetWindowTheme(Handle, '', '');
+  FCanvas2D := TDirect2DCanvas.Create(Handle);
 end;
 
 procedure TForm.NCActivate(var MSG: TWMNCActivate);
@@ -236,7 +239,9 @@ end;
 
 procedure TForm.PaintNC(var MSG: TWMNCPaint);
 begin
+  FCanvas2D.BeginDraw();
   UpdateAll();
+  FCanvas2D.EndDraw;
 end;
 
 procedure TForm.RepaintBorder(ADC: HDC);
@@ -379,6 +384,15 @@ begin
   FMinimizeRect.Right := FMinimizeRect.Left + StyleSystem.Metrics.FormButtonWidth;
   FMinimizeRect.Top := FCloseRect.Top;
   FMinimizeRect.Bottom := FMinimizeRect.Top + StyleSystem.Metrics.FormButtonHeight;
+end;
+
+procedure TForm.WMPaint(var MSG: TWMPaint);
+begin
+  FCanvas2D.BeginDraw();
+  FCanvas2D.Brush.Color := Color;
+  FCanvas2D.FillRect(Rect(0, 0, Width, Height));
+  inherited;
+  FCanvas2D.EndDraw;
 end;
 
 end.
